@@ -8,11 +8,12 @@
 - Next.js 14 + TypeScript + TailwindCSS 기본 프로젝트 구조를 생성했다.
 - 첫 화면을 랜딩이 아닌 실제 방명록 작성 화면으로 구성했다.
 - 캔버스 드로잉과 기본 버튼 UI(사진첨부/지우기/등록) 골격을 구현했다.
+- 로컬 실행 오류 원인이었던 `next.config.ts`를 `next.config.mjs`로 교체해 Next.js 설정 로딩 오류를 해소했다.
 
 ### 완료됨
 
 - 프로젝트 실행을 위한 기본 파일 구성.
-  - `package.json`, `tsconfig.json`, `next.config.ts`
+  - `package.json`, `tsconfig.json`, `next.config.mjs`
   - `app/layout.tsx`, `app/page.tsx`, `app/globals.css`
   - `tailwind.config.ts`, `postcss.config.js`
 - 손그림 스타일 등록 화면 초안 구현.
@@ -21,6 +22,8 @@
 - UI 기준을 반영.
   - 흰 배경 + 검은 테두리 + 손글씨 폰트 중심의 미니멀 톤
   - 첫 화면을 곧바로 방명록 등록 경험으로 제공
+- 실행 이슈 대응.
+  - Next.js가 TypeScript 설정 파일(`next.config.ts`)을 지원하지 않아 dev 서버가 종료되던 문제를 `next.config.mjs` 전환으로 수정
 
 ### 다음 작업
 
