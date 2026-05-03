@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/remove-unsupported-next-config.mjs",
+    "prebuild": "node scripts/remove-unsupported-next-config.mjs",
+    "prestart": "node scripts/remove-unsupported-next-config.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

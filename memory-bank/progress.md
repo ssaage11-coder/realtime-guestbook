@@ -9,6 +9,7 @@
 - 첫 화면을 랜딩이 아닌 실제 방명록 작성 화면으로 구성했다.
 - 캔버스 드로잉과 기본 버튼 UI(사진첨부/지우기/등록) 골격을 구현했다.
 - 로컬 실행 오류 원인이었던 `next.config.ts`를 `next.config.mjs`로 교체해 Next.js 설정 로딩 오류를 해소했다.
+- 유사 오류 재발 방지를 위해 `predev/prebuild/prestart`에서 `next.config.ts`를 자동 제거하는 안전 스크립트를 추가했다.
 
 ### 완료됨
 
@@ -24,6 +25,7 @@
   - 첫 화면을 곧바로 방명록 등록 경험으로 제공
 - 실행 이슈 대응.
   - Next.js가 TypeScript 설정 파일(`next.config.ts`)을 지원하지 않아 dev 서버가 종료되던 문제를 `next.config.mjs` 전환으로 수정
+  - 로컬 작업 디렉터리에 `next.config.ts`가 다시 생겨도 실행 전에 자동 제거되도록 보호 로직 추가
 
 ### 다음 작업
 
