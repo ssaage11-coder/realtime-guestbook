@@ -14,12 +14,15 @@
 ### 완료됨
 
 - 프로젝트 실행을 위한 기본 파일 구성.
-  - `package.json`, `tsconfig.json`, `next.config.mjs`
-  - `app/layout.tsx`, `app/page.tsx`, `app/globals.css`
+  - `package.json`, `tsconfig.json`, `next.config.mjs`, `.env.local.example`
+  - `app/layout.tsx`, `app/page.tsx`, `app/posts/page.tsx`, `app/globals.css`
   - `tailwind.config.ts`, `postcss.config.js`
-- 손그림 스타일 등록 화면 초안 구현.
+  - `lib/supabase.ts`, `lib/types.ts`, `lib/helpers.ts`
+- 손그림 스타일 등록 화면 기능 확장.
   - `components/drawing-board.tsx`에서 Pointer 기반 캔버스 드로잉 지원
-  - `지우기` 버튼 캔버스 초기화 동작 연결
+  - 사진첨부 파일 선택/미리보기 상태 연결
+  - 빈 등록 차단, 등록 중 상태, 오류 메시지 표시
+  - Storage 업로드 + `guestbook_posts` insert + `/posts` 라우트 이동 연결
 - UI 기준을 반영.
   - 흰 배경 + 검은 테두리 + 손글씨 폰트 중심의 미니멀 톤
   - 첫 화면을 곧바로 방명록 등록 경험으로 제공
@@ -29,11 +32,10 @@
 
 ### 다음 작업
 
-- `사진첨부` 버튼에 파일 선택/미리보기 상태를 연결한다.
-- `등록` 버튼에 빈 상태 차단, 로딩/에러 상태를 추가한다.
-- Supabase client 및 타입 정의를 추가한다.
-- 이미지 업로드(Storage) + `guestbook_posts` insert를 연결한다.
-- 등록 완료 후 포스트잇 목록 화면 라우트를 구현한다.
+- `posts` 목록 화면에서 Supabase 조회 + 실시간 insert 구독을 구현한다.
+- 상세/댓글 화면 라우트를 추가하고 댓글 실시간 구독을 구현한다.
+- 업로드/등록 실패 케이스를 사용자 친화적인 메시지로 세분화한다.
+- `.env.local.example` 안내와 실제 Supabase 프로젝트 설정 가이드를 보강한다.
 
 ### 메모
 
