@@ -4,39 +4,44 @@
 
 ### 현재 상태
 
-- 단계: 등록/목록/상세 핵심 흐름 연결 진행 중.
-- 로컬 개발서버에서 첫 화면 접근은 가능하며, 등록 이후 목록/상세 라우트 골격까지 동작한다.
+- 단계: 마감/검증 직전.
+- 등록 → 목록 → 상세/댓글의 핵심 사용자 흐름과 Realtime 구독 연결이 완료되었다.
 
-### 완료됨
+### 단계별 진행 내역
 
-- 공통 Supabase 기반 확장.
-  - `.env.local.example`로 필수 환경변수 템플릿 제공
-  - `lib/supabase.ts`, `lib/types.ts`, `lib/helpers.ts` 추가
-  - 한국어 상대 시간 포맷터(`formatRelativeKoreanTime`) 추가
-- 등록 화면 기능 확장.
-  - 사진첨부 파일 선택/미리보기
-  - 빈 등록 차단, 등록 중 상태, 오류 표시
-  - Storage 업로드 + `guestbook_posts` insert 처리
-- 목록 화면 구현 (`/posts`).
-  - 초기 `guestbook_posts` 조회 및 정렬
-  - `guestbook_posts` insert Realtime 구독
-  - 빈 상태/로딩/에러 상태 처리
-  - 포스트 클릭 시 상세 페이지 이동
-- 상세/댓글 화면 구현 (`/posts/[id]`).
-  - 단일 포스트 조회
-  - 댓글 조회 및 렌더링
-  - 댓글 작성 폼 + insert
-  - `comments` insert Realtime 구독
-  - 컴포넌트 unmount 시 채널 정리
+1. 공통 기반 정리
+   - Supabase client, 타입, 헬퍼 유틸을 추가했다.
+   - `.env.local.example`에 필수 환경변수 템플릿을 추가했다.
 
-### 다음 작업
+2. 등록 화면 기능화
+   - 캔버스 드로잉 + 사진 첨부/미리보기 + 빈 등록 차단 구현
+   - 등록 시 Storage 업로드 + `guestbook_posts` insert 연결
+   - 로딩/에러 상태 추가
 
-- Supabase SQL schema / RLS / Realtime enable 여부를 실제 프로젝트에 맞게 점검한다.
-- 등록/댓글 실패 케이스별 사용자 메시지를 세분화한다.
-- 목록/상세 UI를 스케치 기준 손그림 스타일에 더 가깝게 다듬는다.
-- build/lint/typecheck와 2창 실시간 수동 테스트를 완료한다.
+3. 목록 화면 구현
+   - `/posts` 라우트에서 초기 조회 및 빈/로딩/에러 상태 처리
+   - `guestbook_posts` INSERT Realtime 구독
+
+4. 상세/댓글 화면 구현
+   - `/posts/[id]` 라우트에서 포스트/댓글 조회
+   - 댓글 작성 폼 + insert
+   - `comments` INSERT Realtime 구독
+   - 컴포넌트 unmount 시 channel 정리
+
+5. 배포 전 구성 보강
+   - Supabase 초기 스키마/정책/Realtime/Storage SQL 파일 추가 (`supabase/sql/001_init_guestbook.sql`)
+   - 아키텍처 문서를 실제 구현 라우트/모듈 기준으로 갱신
+
+### 남은 작업 (검증 단계)
+
+- `npm run lint`, `npm run build`, 필요 시 typecheck 실행
+- 2개 브라우저 창으로 실시간 수동 검증
+  - 포스트 등록 실시간 반영
+  - 댓글 등록 실시간 반영
+  - 그림 등록/사진 등록/지우기/빈 등록/에러 상태 점검
+- 검증 결과를 본 문서에 추가 기록
 
 ### 메모
 
-- 현재 구현은 Supabase 프로젝트가 준비되어 있다는 전제에서 동작한다.
-- 환경변수가 비어 있으면 Supabase client 초기화 오류가 발생한다.
+- 환경에 따라 npm registry 접근 제한이 있으면 의존성 설치 및 검증이 차단될 수 있다.
+- Supabase 환경변수 미설정 시 클라이언트 초기화 오류가 발생한다.
