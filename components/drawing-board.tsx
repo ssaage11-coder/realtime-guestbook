@@ -116,16 +116,17 @@ export default function DrawingBoard() {
         imageType = 'drawing';
       }
 
-      const imagePath = buildStoragePath('guestbook-images', ext);
+      const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET ?? 'guestbook-images';
+      const imagePath = buildStoragePath('posts', ext);
       const { error: uploadError } = await supabase.storage
-        .from('guestbook-images')
+        .from(bucketName)
         .upload(imagePath, imageBlob, { upsert: false, contentType: imageBlob.type || 'image/png' });
 
       if (uploadError) {
         throw new Error(`Storage 업로드 실패: ${uploadError.message}`);
       }
 
-      const { data: publicUrlData } = supabase.storage.from('guestbook-images').getPublicUrl(imagePath);
+      const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(imagePath);
       const imageUrl = publicUrlData.publicUrl;
 
       const { error: insertError } = await supabase.from('guestbook_posts').insert({
