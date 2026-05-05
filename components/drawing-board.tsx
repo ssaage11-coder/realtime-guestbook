@@ -7,6 +7,17 @@ import { buildStoragePath, canvasToBlob } from '@/lib/helpers';
 import { supabase } from '@/lib/supabase';
 import type { ImageType } from '@/lib/types';
 
+function toErrorMessage(error: unknown) {
+  if (!error) return '알 수 없는 오류가 발생했습니다.';
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object') {
+    const maybeMessage = (error as { message?: string }).message;
+    if (maybeMessage) return maybeMessage;
+    return JSON.stringify(error);
+  }
+  return String(error);
+}
+
 export default function DrawingBoard() {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -111,7 +122,7 @@ export default function DrawingBoard() {
         .upload(imagePath, imageBlob, { upsert: false, contentType: imageBlob.type || 'image/png' });
 
       if (uploadError) {
-        throw uploadError;
+        throw new Error(`Storage 업로드 실패: ${uploadError.message}`);
       }
 
       const { data: publicUrlData } = supabase.storage.from('guestbook-images').getPublicUrl(imagePath);
@@ -124,13 +135,12 @@ export default function DrawingBoard() {
       });
 
       if (insertError) {
-        throw insertError;
+        throw new Error(`DB 저장 실패: ${insertError.message}`);
       }
 
       router.push('/posts');
     } catch (error) {
-      const message = error instanceof Error ? error.message : '등록 중 오류가 발생했습니다.';
-      setErrorMessage(message);
+      setErrorMessage(toErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -149,13 +159,7 @@ export default function DrawingBoard() {
         onPointerLeave={() => setIsDrawing(false)}
       />
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
+      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
 
       {photoPreviewUrl && (
         <div className="rounded-2xl border-2 border-black p-2">
