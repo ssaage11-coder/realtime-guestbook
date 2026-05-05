@@ -123,7 +123,7 @@ export default function DrawingBoard() {
         .upload(imagePath, imageBlob, { upsert: false, contentType: imageBlob.type || 'image/png' });
 
       if (uploadError) {
-        throw new Error(`Storage 업로드 실패: ${uploadError.message}`);
+        throw new Error(`Storage 업로드 실패: ${uploadError.message} (bucket=${bucketName}, path=${imagePath})`);
       }
 
       const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(imagePath);

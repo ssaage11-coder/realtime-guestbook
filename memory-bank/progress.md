@@ -52,3 +52,6 @@
 - 등록 버튼 클릭 시 일반 오류 문구만 노출되던 문제를 개선해 Storage/DB 단계별 실패 메시지를 표시하도록 수정했다.
 - 운영 체크 포인트: Supabase에서는 bucket 생성만으로 충분하지 않으며 DB 테이블/정책/Realtime 설정(`supabase/sql/001_init_guestbook.sql`) 적용이 필요하다.
 - Storage path 오류 가능성을 줄이기 위해 업로드 object 경로를 `posts/...` 형식으로 단순화하고, 버킷명은 `NEXT_PUBLIC_SUPABASE_BUCKET`으로 오버라이드 가능하게 수정했다.
+
+- `NEXT_PUBLIC_SUPABASE_URL`에 경로가 포함돼도 동작하도록 origin으로 정규화하는 로직을 추가했다.
+- Storage 업로드 오류 메시지에 bucket/path 디버그 정보를 포함해 원인 파악을 쉽게 했다.
