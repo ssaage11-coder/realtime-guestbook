@@ -1,8 +1,68 @@
-export function buildStoragePath(prefix: string, ext: string) {
+import type { AuthorProfileDisplay } from '@/lib/types';
+
+export const DEFAULT_AUTHOR_NICKNAME = '방문자';
+export const DEFAULT_AVATAR_URL = '/default-avatar.svg';
+export const MAX_NICKNAME_LENGTH = 20;
+export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+export const ALLOWED_AVATAR_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const;
+
+export function buildStoragePath(prefix: string, ext: string, ownerId?: string) {
   const safePrefix = prefix.replace(/[^a-z0-9-_]/gi, '').toLowerCase() || 'guestbook';
+  const safeOwnerId = ownerId?.replace(/[^a-z0-9-]/gi, '').toLowerCase();
   const timestamp = Date.now();
   const random = Math.random().toString(36).slice(2, 10);
-  return `${safePrefix}/${timestamp}-${random}.${ext}`;
+  const fileName = `${timestamp}-${random}.${ext}`;
+
+  return safeOwnerId ? `${safeOwnerId}/${safePrefix}/${fileName}` : `${safePrefix}/${fileName}`;
+}
+
+export function buildProfileAvatarPath(ownerId: string, ext: string) {
+  return buildStoragePath('profile', ext, ownerId);
+}
+
+export function buildDefaultAuthorDisplay(userId: string | null = null): AuthorProfileDisplay {
+  return {
+    user_id: userId,
+    nickname: DEFAULT_AUTHOR_NICKNAME,
+    avatar_url: DEFAULT_AVATAR_URL,
+  };
+}
+
+export function normalizeNickname(value: string) {
+  return value.trim();
+}
+
+export function validateNickname(value: string) {
+  const nickname = normalizeNickname(value);
+
+  if (!nickname) {
+    return '닉네임을 입력해 주세요.';
+  }
+
+  if (nickname.length > MAX_NICKNAME_LENGTH) {
+    return `닉네임은 ${MAX_NICKNAME_LENGTH}자 이하로 입력해 주세요.`;
+  }
+
+  return null;
+}
+
+export function getAvatarExtension(file: File) {
+  if (file.type === 'image/png') return 'png';
+  if (file.type === 'image/jpeg') return 'jpg';
+  if (file.type === 'image/webp') return 'webp';
+  return null;
+}
+
+export function validateAvatarFile(file: File) {
+  if (!ALLOWED_AVATAR_TYPES.includes(file.type as (typeof ALLOWED_AVATAR_TYPES)[number])) {
+    return '프로필 이미지는 PNG, JPEG, WebP 파일만 사용할 수 있습니다.';
+  }
+
+  if (file.size > MAX_AVATAR_BYTES) {
+    return '프로필 이미지는 2MB 이하만 사용할 수 있습니다.';
+  }
+
+  return null;
 }
 
 export function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {

@@ -1,7 +1,10 @@
 'use client';
 
 import { ChangeEvent, useMemo, useRef, useState } from 'react';
+import { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 
 import { buildStoragePath, canvasToBlob } from '@/lib/helpers';
 import { supabase } from '@/lib/supabase';
@@ -27,9 +30,41 @@ export default function DrawingBoard() {
   const [hasStroke, setHasStroke] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const photoPreviewUrl = useMemo(() => (photoFile ? URL.createObjectURL(photoFile) : null), [photoFile]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSession() {
+      const { data, error } = await supabase.auth.getSession();
+      if (!active) return;
+      if (error) {
+        setErrorMessage(error.message);
+      } else {
+        setUser(data.session?.user ?? null);
+      }
+      setAuthLoading(false);
+    }
+
+    loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+      setErrorMessage(null);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const getPoint = (event: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -90,6 +125,16 @@ export default function DrawingBoard() {
   };
 
   const handleSubmit = async () => {
+    const {
+      data: { user: currentUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !currentUser) {
+      setErrorMessage('로그인 후 방명록을 등록할 수 있습니다.');
+      return;
+    }
+
     if (!hasStroke && !photoFile) {
       setErrorMessage('그림을 그리거나 사진을 첨부한 뒤 등록해 주세요.');
       return;
@@ -117,7 +162,7 @@ export default function DrawingBoard() {
       }
 
       const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET ?? 'guestbook-images';
-      const imagePath = buildStoragePath('posts', ext);
+      const imagePath = buildStoragePath('posts', ext, currentUser.id);
       const { error: uploadError } = await supabase.storage
         .from(bucketName)
         .upload(imagePath, imageBlob, { upsert: false, contentType: imageBlob.type || 'image/png' });
@@ -130,6 +175,7 @@ export default function DrawingBoard() {
       const imageUrl = publicUrlData.publicUrl;
 
       const { error: insertError } = await supabase.from('guestbook_posts').insert({
+        user_id: currentUser.id,
         image_url: imageUrl,
         image_path: imagePath,
         image_type: imageType,
@@ -172,6 +218,15 @@ export default function DrawingBoard() {
 
       {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
 
+      {!authLoading && !user && (
+        <div className="rounded-2xl border-2 border-black p-3 text-xl">
+          <p>로그인 후 방명록을 등록할 수 있습니다.</p>
+          <Link href="/login?next=/" className="mt-2 inline-block rounded-full border-2 border-black px-4 py-1">
+            로그인
+          </Link>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-3 self-center">
         <button
           type="button"
@@ -187,7 +242,7 @@ export default function DrawingBoard() {
           type="button"
           className="rounded-full border-[3px] border-black px-5 py-2 text-2xl disabled:opacity-40"
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || authLoading || !user}
         >
           {isSubmitting ? '등록중...' : '등록'}
         </button>
